@@ -1,4 +1,5 @@
 use either::Either;
+use sauron_vdom::{Attribute, Callback, Event};
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
 
@@ -40,12 +41,12 @@ fn get_line_offset(line_width: u16, text_area_width: u16, alignment: Alignment) 
 ///     .wrap(true);
 /// # }
 /// ```
-pub struct Paragraph<'a, 't, T>
+pub struct Paragraph<'a, 't, T, MSG>
 where
     T: Iterator<Item = &'t Text<'t>>,
 {
     /// A block to wrap the widget in
-    block: Option<Block<'a>>,
+    block: Option<Block<'a, MSG>>,
     /// area occupied by this paragraph
     area: Rect,
     /// Widget style
@@ -60,13 +61,16 @@ where
     scroll: u16,
     /// Aligenment of the text
     alignment: Alignment,
+    /// events attached to this block
+    pub events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'a, 't, T> Paragraph<'a, 't, T>
+impl<'a, 't, T, MSG> Paragraph<'a, 't, T, MSG>
 where
     T: Iterator<Item = &'t Text<'t>>,
+    MSG: 'static,
 {
-    pub fn new(text: T) -> Paragraph<'a, 't, T> {
+    pub fn new(text: T) -> Self {
         Paragraph {
             block: None,
             style: Default::default(),
@@ -76,54 +80,72 @@ where
             scroll: 0,
             alignment: Alignment::Left,
             area: Default::default(),
+            events: vec![],
         }
     }
 
-    pub fn block(mut self, block: Block<'a>) -> Paragraph<'a, 't, T> {
+    pub fn block(mut self, block: Block<'a, MSG>) -> Self {
         self.block = Some(block);
         self
     }
 
-    pub fn style(mut self, style: Style) -> Paragraph<'a, 't, T> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn wrap(mut self, flag: bool) -> Paragraph<'a, 't, T> {
+    pub fn wrap(mut self, flag: bool) -> Self {
         self.wrapping = flag;
         self
     }
 
-    pub fn raw(mut self, flag: bool) -> Paragraph<'a, 't, T> {
+    pub fn raw(mut self, flag: bool) -> Self {
         self.raw = flag;
         self
     }
 
-    pub fn scroll(mut self, offset: u16) -> Paragraph<'a, 't, T> {
+    pub fn scroll(mut self, offset: u16) -> Self {
         self.scroll = offset;
         self
     }
 
-    pub fn alignment(mut self, alignment: Alignment) -> Paragraph<'a, 't, T> {
+    pub fn alignment(mut self, alignment: Alignment) -> Self {
         self.alignment = alignment;
         self
     }
 
     pub fn area(mut self, area: Rect) -> Self {
         self.area = area;
-        if let Some(block) = self.block {
-            block.area(area);
-        }
         self
+    }
+    pub fn triggers_event(&self, event: &Event) -> Option<&Callback<Event, MSG>> {
+        match event {
+            Event::MouseEvent(me) => {
+                let x = me.coordinate.x();
+                let y = me.coordinate.y();
+                if self.area.hit(x, y) {
+                    for listener in &self.events {
+                        if me.r#type == listener.name {
+                            return listener.get_callback();
+                        }
+                    }
+                    None
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
     }
 }
 
-impl<'a, 't, 'b, T> Widget for Paragraph<'a, 't, T>
+impl<'a, 't, 'b, T, MSG> Widget for Paragraph<'a, 't, T, MSG>
 where
     T: Iterator<Item = &'t Text<'t>>,
+    MSG: 'static,
 {
     fn get_area(&self) -> Rect {
-        match self.block {
+        match &self.block {
             Some(b) => b.inner(),
             None => self.area,
         }

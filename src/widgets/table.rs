@@ -1,11 +1,11 @@
-use std::{fmt::Display, iter::Iterator};
-
 use crate::{
     buffer::Buffer,
     layout::Rect,
     style::Style,
     widgets::{Block, Widget},
 };
+use sauron_vdom::{Attribute, Event};
+use std::{fmt::Display, iter::Iterator};
 
 /// Holds data to be displayed in a Table widget
 pub enum Row<D, I>
@@ -42,7 +42,7 @@ where
 ///     .column_spacing(1);
 /// # }
 /// ```
-pub struct Table<'a, T, H, I, D, R>
+pub struct Table<'a, T, H, I, D, R, MSG>
 where
     T: Display,
     H: Iterator<Item = T>,
@@ -51,7 +51,7 @@ where
     R: Iterator<Item = Row<D, I>>,
 {
     /// A block to wrap the widget in
-    block: Option<Block<'a>>,
+    block: Option<Block<'a, MSG>>,
     /// Base style for the widget
     style: Style,
     /// Header row for all columns
@@ -67,9 +67,11 @@ where
     rows: R,
     /// area occupied by this table
     area: Rect,
+    /// events attached to this block
+    pub events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'a, T, H, I, D, R> Default for Table<'a, T, H, I, D, R>
+impl<'a, T, H, I, D, R, MSG> Default for Table<'a, T, H, I, D, R, MSG>
 where
     T: Display,
     H: Iterator<Item = T> + Default,
@@ -77,7 +79,7 @@ where
     D: Iterator<Item = I>,
     R: Iterator<Item = Row<D, I>> + Default,
 {
-    fn default() -> Table<'a, T, H, I, D, R> {
+    fn default() -> Self {
         Table {
             block: None,
             style: Style::default(),
@@ -87,11 +89,12 @@ where
             rows: R::default(),
             column_spacing: 1,
             area: Default::default(),
+            events: vec![],
         }
     }
 }
 
-impl<'a, T, H, I, D, R> Table<'a, T, H, I, D, R>
+impl<'a, T, H, I, D, R, MSG> Table<'a, T, H, I, D, R, MSG>
 where
     T: Display,
     H: Iterator<Item = T>,
@@ -99,7 +102,7 @@ where
     D: Iterator<Item = I>,
     R: Iterator<Item = Row<D, I>>,
 {
-    pub fn new(header: H, rows: R) -> Table<'a, T, H, I, D, R> {
+    pub fn new(header: H, rows: R) -> Self {
         Table {
             block: None,
             style: Style::default(),
@@ -109,15 +112,16 @@ where
             rows,
             column_spacing: 1,
             area: Default::default(),
+            events: vec![],
         }
     }
 
-    pub fn block(mut self, block: Block<'a>) -> Table<'a, T, H, I, D, R> {
+    pub fn block(mut self, block: Block<'a, MSG>) -> Self {
         self.block = Some(block);
         self
     }
 
-    pub fn header<II>(mut self, header: II) -> Table<'a, T, H, I, D, R>
+    pub fn header<II>(mut self, header: II) -> Self
     where
         II: IntoIterator<Item = T, IntoIter = H>,
     {
@@ -125,17 +129,17 @@ where
         self
     }
 
-    pub fn header_style(mut self, style: Style) -> Table<'a, T, H, I, D, R> {
+    pub fn header_style(mut self, style: Style) -> Self {
         self.header_style = style;
         self
     }
 
-    pub fn widths(mut self, widths: &'a [u16]) -> Table<'a, T, H, I, D, R> {
+    pub fn widths(mut self, widths: &'a [u16]) -> Self {
         self.widths = widths;
         self
     }
 
-    pub fn rows<II>(mut self, rows: II) -> Table<'a, T, H, I, D, R>
+    pub fn rows<II>(mut self, rows: II) -> Self
     where
         II: IntoIterator<Item = Row<D, I>, IntoIter = R>,
     {
@@ -143,12 +147,12 @@ where
         self
     }
 
-    pub fn style(mut self, style: Style) -> Table<'a, T, H, I, D, R> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn column_spacing(mut self, spacing: u16) -> Table<'a, T, H, I, D, R> {
+    pub fn column_spacing(mut self, spacing: u16) -> Self {
         self.column_spacing = spacing;
         self
     }
@@ -159,13 +163,14 @@ where
     }
 }
 
-impl<'a, T, H, I, D, R> Widget for Table<'a, T, H, I, D, R>
+impl<'a, T, H, I, D, R, MSG> Widget for Table<'a, T, H, I, D, R, MSG>
 where
     T: Display,
     H: Iterator<Item = T>,
     I: Display,
     D: Iterator<Item = I>,
     R: Iterator<Item = Row<D, I>>,
+    MSG: 'static,
 {
     fn get_area(&self) -> Rect {
         self.area

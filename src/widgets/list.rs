@@ -11,53 +11,58 @@ use crate::{
     style::Style,
     widgets::{Block, Text, Widget},
 };
+use sauron_vdom::{Attribute, Event};
 
-pub struct List<'b, L>
+pub struct List<'b, L, MSG>
 where
     L: Iterator<Item = Text<'b>>,
 {
-    block: Option<Block<'b>>,
+    block: Option<Block<'b, MSG>>,
     items: L,
     style: Style,
     start_corner: Corner,
     area: Rect,
+    /// events attached to this block
+    pub events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'b, L> Default for List<'b, L>
+impl<'b, L, MSG> Default for List<'b, L, MSG>
 where
     L: Iterator<Item = Text<'b>> + Default,
 {
-    fn default() -> List<'b, L> {
+    fn default() -> Self {
         List {
             block: None,
             items: L::default(),
             style: Default::default(),
             start_corner: Corner::TopLeft,
             area: Default::default(),
+            events: vec![],
         }
     }
 }
 
-impl<'b, L> List<'b, L>
+impl<'b, L, MSG> List<'b, L, MSG>
 where
     L: Iterator<Item = Text<'b>>,
 {
-    pub fn new(items: L) -> List<'b, L> {
+    pub fn new(items: L) -> Self {
         List {
             block: None,
             items,
             style: Default::default(),
             start_corner: Corner::TopLeft,
             area: Default::default(),
+            events: vec![],
         }
     }
 
-    pub fn block(mut self, block: Block<'b>) -> List<'b, L> {
+    pub fn block(mut self, block: Block<'b, MSG>) -> Self {
         self.block = Some(block);
         self
     }
 
-    pub fn items<I>(mut self, items: I) -> List<'b, L>
+    pub fn items<I>(mut self, items: I) -> Self
     where
         I: IntoIterator<Item = Text<'b>, IntoIter = L>,
     {
@@ -65,12 +70,12 @@ where
         self
     }
 
-    pub fn style(mut self, style: Style) -> List<'b, L> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn start_corner(mut self, corner: Corner) -> List<'b, L> {
+    pub fn start_corner(mut self, corner: Corner) -> Self {
         self.start_corner = corner;
         self
     }
@@ -81,9 +86,10 @@ where
     }
 }
 
-impl<'b, L> Widget for List<'b, L>
+impl<'b, L, MSG> Widget for List<'b, L, MSG>
 where
     L: Iterator<Item = Text<'b>>,
+    MSG: 'static,
 {
     fn get_area(&self) -> Rect {
         self.area
@@ -144,8 +150,8 @@ where
 ///     .highlight_symbol(">>");
 /// # }
 /// ```
-pub struct SelectableList<'b> {
-    block: Option<Block<'b>>,
+pub struct SelectableList<'b, MSG> {
+    block: Option<Block<'b, MSG>>,
     /// Items to be displayed
     items: Vec<&'b str>,
     /// Index of the one selected
@@ -157,10 +163,12 @@ pub struct SelectableList<'b> {
     /// Symbol in front of the selected item (Shift all items to the right)
     highlight_symbol: Option<&'b str>,
     area: Rect,
+    /// events attached to this block
+    pub events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'b> Default for SelectableList<'b> {
-    fn default() -> SelectableList<'b> {
+impl<'b, MSG> Default for SelectableList<'b, MSG> {
+    fn default() -> Self {
         SelectableList {
             block: None,
             items: Vec::new(),
@@ -169,17 +177,18 @@ impl<'b> Default for SelectableList<'b> {
             highlight_style: Default::default(),
             highlight_symbol: None,
             area: Default::default(),
+            events: vec![],
         }
     }
 }
 
-impl<'b> SelectableList<'b> {
-    pub fn block(mut self, block: Block<'b>) -> SelectableList<'b> {
+impl<'b, MSG> SelectableList<'b, MSG> {
+    pub fn block(mut self, block: Block<'b, MSG>) -> Self {
         self.block = Some(block);
         self
     }
 
-    pub fn items<I>(mut self, items: &'b [I]) -> SelectableList<'b>
+    pub fn items<I>(mut self, items: &'b [I]) -> Self
     where
         I: AsRef<str> + 'b,
     {
@@ -187,28 +196,31 @@ impl<'b> SelectableList<'b> {
         self
     }
 
-    pub fn style(mut self, style: Style) -> SelectableList<'b> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn highlight_symbol(mut self, highlight_symbol: &'b str) -> SelectableList<'b> {
+    pub fn highlight_symbol(mut self, highlight_symbol: &'b str) -> Self {
         self.highlight_symbol = Some(highlight_symbol);
         self
     }
 
-    pub fn highlight_style(mut self, highlight_style: Style) -> SelectableList<'b> {
+    pub fn highlight_style(mut self, highlight_style: Style) -> Self {
         self.highlight_style = highlight_style;
         self
     }
 
-    pub fn select(mut self, index: Option<usize>) -> SelectableList<'b> {
+    pub fn select(mut self, index: Option<usize>) -> Self {
         self.selected = index;
         self
     }
 }
 
-impl<'b> Widget for SelectableList<'b> {
+impl<'b, MSG> Widget for SelectableList<'b, MSG>
+where
+    MSG: Clone + 'static,
+{
     fn get_area(&self) -> Rect {
         self.area
     }
@@ -258,7 +270,7 @@ impl<'b> Widget for SelectableList<'b> {
             })
             .skip(offset as usize);
         List::new(items)
-            .block(self.block.unwrap_or_default())
+            .block(self.block.clone().unwrap_or_default())
             .style(self.style)
             .draw(buf);
     }

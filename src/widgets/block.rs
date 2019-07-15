@@ -5,7 +5,7 @@ use crate::{
     symbols::line,
     widgets::{Borders, Widget},
 };
-use sauron_vdom::Event;
+use sauron_vdom::{Attribute, Callback, Event};
 
 /// Base widget to be used with all upper level ones. It may be used to display a box border around
 /// the widget and/or add a title.
@@ -24,8 +24,8 @@ use sauron_vdom::Event;
 ///     .style(Style::default().bg(Color::Black));
 /// # }
 /// ```
-#[derive(Clone, Copy)]
-pub struct Block<'a> {
+#[derive(Clone)]
+pub struct Block<'a, MSG> {
     /// Optional title place on the upper left of the block
     title: Option<&'a str>,
     /// Title style
@@ -38,10 +38,12 @@ pub struct Block<'a> {
     style: Style,
     /// area of the block,
     area: Rect,
+    /// events attached to this block
+    pub events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'a> Default for Block<'a> {
-    fn default() -> Block<'a> {
+impl<'a, MSG> Default for Block<'a, MSG> {
+    fn default() -> Self {
         Block {
             title: None,
             title_style: Default::default(),
@@ -49,54 +51,61 @@ impl<'a> Default for Block<'a> {
             border_style: Default::default(),
             style: Default::default(),
             area: Default::default(),
+            events: vec![],
         }
     }
 }
 
-impl<'a> Block<'a> {
-    pub fn title(mut self, title: &'a str) -> Block<'a> {
+impl<'a, MSG> Block<'a, MSG>
+where
+    MSG: 'static,
+{
+    pub fn title(mut self, title: &'a str) -> Self {
         self.title = Some(title);
         self
     }
 
-    pub fn area(mut self, area: Rect) -> Block<'a> {
+    pub fn area(mut self, area: Rect) -> Self {
         self.area = area;
         self
     }
 
-    pub fn title_style(mut self, style: Style) -> Block<'a> {
+    pub fn title_style(mut self, style: Style) -> Self {
         self.title_style = style;
         self
     }
 
-    pub fn border_style(mut self, style: Style) -> Block<'a> {
+    pub fn border_style(mut self, style: Style) -> Self {
         self.border_style = style;
         self
     }
 
-    pub fn style(mut self, style: Style) -> Block<'a> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn borders(mut self, flag: Borders) -> Block<'a> {
+    pub fn borders(mut self, flag: Borders) -> Self {
         self.borders = flag;
         self
     }
-
-    pub fn triggers_event(&self, event: &Event) -> bool {
-        //println!("testing event");
+    pub fn triggers_event(&self, event: &Event) -> Option<&Callback<Event, MSG>> {
         match event {
             Event::MouseEvent(me) => {
                 let x = me.coordinate.x();
                 let y = me.coordinate.y();
-                println!("point: {},{}", x, y);
-                println!("rect: {:?}", self.area);
-                //TODO: widgets should contain the attributes
-                // and match if this even is here then trigger it
-                self.area.hit(x, y)
+                if self.area.hit(x, y) {
+                    for listener in &self.events {
+                        if me.r#type == listener.name {
+                            return listener.get_callback();
+                        }
+                    }
+                    None
+                } else {
+                    None
+                }
             }
-            _ => false,
+            _ => None,
         }
     }
 
@@ -124,7 +133,7 @@ impl<'a> Block<'a> {
     }
 }
 
-impl<'a> Widget for Block<'a> {
+impl<'a, MSG> Widget for Block<'a, MSG> {
     fn get_area(&self) -> Rect {
         self.area
     }

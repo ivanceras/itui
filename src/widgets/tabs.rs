@@ -1,3 +1,4 @@
+use sauron_vdom::{Attribute, Event};
 use unicode_width::UnicodeWidthStr;
 
 use crate::{
@@ -25,12 +26,12 @@ use crate::{
 ///     .divider(DOT);
 /// # }
 /// ```
-pub struct Tabs<'a, T>
+pub struct Tabs<'a, T, MSG>
 where
     T: AsRef<str> + 'a,
 {
     /// A block to wrap this widget in if necessary
-    block: Option<Block<'a>>,
+    block: Option<Block<'a, MSG>>,
     /// One title for each tab
     titles: &'a [T],
     /// The index of the selected tabs
@@ -43,13 +44,15 @@ where
     divider: &'a str,
     /// area occupied by this tabs
     area: Rect,
+    /// events attached to this block
+    events: Vec<Attribute<Event, MSG>>,
 }
 
-impl<'a, T> Default for Tabs<'a, T>
+impl<'a, T, MSG> Default for Tabs<'a, T, MSG>
 where
     T: AsRef<str>,
 {
-    fn default() -> Tabs<'a, T> {
+    fn default() -> Tabs<'a, T, MSG> {
         Tabs {
             block: None,
             titles: &[],
@@ -58,40 +61,41 @@ where
             highlight_style: Default::default(),
             divider: line::VERTICAL,
             area: Default::default(),
+            events: vec![],
         }
     }
 }
 
-impl<'a, T> Tabs<'a, T>
+impl<'a, T, MSG> Tabs<'a, T, MSG>
 where
     T: AsRef<str>,
 {
-    pub fn block(mut self, block: Block<'a>) -> Tabs<'a, T> {
+    pub fn block(mut self, block: Block<'a, MSG>) -> Self {
         self.block = Some(block);
         self
     }
 
-    pub fn titles(mut self, titles: &'a [T]) -> Tabs<'a, T> {
+    pub fn titles(mut self, titles: &'a [T]) -> Self {
         self.titles = titles;
         self
     }
 
-    pub fn select(mut self, selected: usize) -> Tabs<'a, T> {
+    pub fn select(mut self, selected: usize) -> Self {
         self.selected = selected;
         self
     }
 
-    pub fn style(mut self, style: Style) -> Tabs<'a, T> {
+    pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    pub fn highlight_style(mut self, style: Style) -> Tabs<'a, T> {
+    pub fn highlight_style(mut self, style: Style) -> Self {
         self.highlight_style = style;
         self
     }
 
-    pub fn divider(mut self, divider: &'a str) -> Tabs<'a, T> {
+    pub fn divider(mut self, divider: &'a str) -> Self {
         self.divider = divider;
         self
     }
@@ -102,9 +106,10 @@ where
     }
 }
 
-impl<'a, T> Widget for Tabs<'a, T>
+impl<'a, T, MSG> Widget for Tabs<'a, T, MSG>
 where
     T: AsRef<str>,
+    MSG: 'static,
 {
     fn get_area(&self) -> Rect {
         self.area
