@@ -18,6 +18,28 @@ in a GUI and html.
     - [ ] input event
 
 
+## Text base button with hover/click effect
+
+
+## Rounded button
+  ╭──────╮    ▄▄▄▄▄▄▄▄
+  │ btn  │    █ btn ██
+  ╰──────╯    ▀▀▀▀▀▀▀▀
+
+## Flat buttons
+  ┌──────┐    ▄▄▄▄▄▄▄▄
+  │ btn01│    █btn01██
+  └──────┘    ▀▀▀▀▀▀▀▀
+
+### Tabs:
+
+
+```
+  ╭──────╮______________
+  │ tab1 │ tab2 │ tab2 │
+  └──────┴──────┘──────┘
+```
+
 ## License
 
 [MIT](LICENSE)
