@@ -7,9 +7,11 @@ mod paragraph;
 mod reflow;
 mod table;
 mod tabs;
+mod button;
 
 pub use self::{
     block::Block,
+    button::Button,
     list::{List, SelectableList},
     paragraph::Paragraph,
     table::{Row, Table},
