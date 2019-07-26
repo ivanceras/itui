@@ -7,6 +7,7 @@ A library to build rich terminal user interfaces or dashboards
 """
 keywords = ["tui", "terminal", "dashboard"]
 repository = "https://github.com/ivanceras/itui"
+documentation = "https://docs.rs/itui"
 license = "MIT"
 exclude = ["assets/*", ".travis.yml"]
 autoexamples = true
