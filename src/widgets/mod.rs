@@ -2,12 +2,12 @@ use bitflags::bitflags;
 use std::borrow::Cow;
 
 mod block;
+mod button;
 mod list;
 mod paragraph;
 mod reflow;
 mod table;
 mod tabs;
-mod button;
 
 pub use self::{
     block::Block,

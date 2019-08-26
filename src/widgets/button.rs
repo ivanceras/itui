@@ -2,8 +2,7 @@ use crate::{
     buffer::Buffer,
     layout::Rect,
     style::Style,
-    symbols::line,
-    symbols::rounded,
+    symbols::{line, rounded},
     widgets::{Borders, Widget},
 };
 use sauron_vdom::{Attribute, Callback, Event};
@@ -64,8 +63,7 @@ impl<MSG> Button<MSG>
 where
     MSG: 'static,
 {
-
-    pub fn new(events: Vec<Attribute<Event,MSG>>, label: &str) -> Self {
+    pub fn new(events: Vec<Attribute<Event, MSG>>, label: &str) -> Self {
         Button::default().events(events).label(label)
     }
     pub fn label(mut self, label: &str) -> Self {
@@ -78,7 +76,7 @@ where
         self
     }
 
-    pub fn events(mut self, events: Vec<Attribute<Event,MSG>>) -> Self {
+    pub fn events(mut self, events: Vec<Attribute<Event, MSG>>) -> Self {
         self.events = events;
         self
     }
@@ -142,41 +140,42 @@ where
         inner
     }
 
-    fn get_top_left(&self) -> &'static str{
-        if self.rounded_border{
+    fn get_top_left(&self) -> &'static str {
+        if self.rounded_border {
             rounded::TOP_LEFT
-        }else{
+        } else {
             line::TOP_LEFT
         }
     }
 
-    fn get_top_right(&self) -> &'static str{
-        if self.rounded_border{
+    fn get_top_right(&self) -> &'static str {
+        if self.rounded_border {
             rounded::TOP_RIGHT
-        }else{
+        } else {
             line::TOP_RIGHT
         }
     }
 
-    fn get_bottom_left(&self) -> &'static str{
-        if self.rounded_border{
+    fn get_bottom_left(&self) -> &'static str {
+        if self.rounded_border {
             rounded::BOTTOM_LEFT
-        }else{
+        } else {
             line::BOTTOM_LEFT
         }
     }
 
-    fn get_bottom_right(&self) -> &'static str{
-        if self.rounded_border{
+    fn get_bottom_right(&self) -> &'static str {
+        if self.rounded_border {
             rounded::BOTTOM_RIGHT
-        }else{
+        } else {
             line::BOTTOM_RIGHT
         }
     }
 }
 
 impl<MSG> Widget for Button<MSG>
-where MSG: 'static,
+where
+    MSG: 'static,
 {
     fn get_area(&self) -> Rect {
         self.area
@@ -240,24 +239,24 @@ where MSG: 'static,
         }
 
         if self.area.width > 2 {
-                let lx = if self.borders.intersects(Borders::LEFT) {
-                    1
-                } else {
-                    0
-                };
-                let rx = if self.borders.intersects(Borders::RIGHT) {
-                    1
-                } else {
-                    0
-                };
-                let width = self.area.width - lx - rx;
-                buf.set_stringn(
-                    self.area.left() + lx,
-                    self.area.top()+1,
-                    &self.text,
-                    width as usize,
-                    self.title_style,
-                );
+            let lx = if self.borders.intersects(Borders::LEFT) {
+                1
+            } else {
+                0
+            };
+            let rx = if self.borders.intersects(Borders::RIGHT) {
+                1
+            } else {
+                0
+            };
+            let width = self.area.width - lx - rx;
+            buf.set_stringn(
+                self.area.left() + lx,
+                self.area.top() + 1,
+                &self.text,
+                width as usize,
+                self.title_style,
+            );
         }
     }
 }
