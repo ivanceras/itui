@@ -39,7 +39,7 @@ pub struct Block<'a, MSG> {
     /// area of the block,
     area: Rect,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'a, MSG> Default for Block<'a, MSG> {

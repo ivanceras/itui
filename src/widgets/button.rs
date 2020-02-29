@@ -41,7 +41,7 @@ pub struct Button<MSG> {
     /// area of the block,
     area: Rect,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<MSG> Default for Button<MSG> {
@@ -63,7 +63,7 @@ impl<MSG> Button<MSG>
 where
     MSG: 'static,
 {
-    pub fn new(events: Vec<Attribute<Event, MSG>>, label: &str) -> Self {
+    pub fn new(events: Vec<Attribute<&'static str, Event, MSG>>, label: &str) -> Self {
         Button::default().events(events).label(label)
     }
     pub fn label(mut self, label: &str) -> Self {
@@ -76,7 +76,7 @@ where
         self
     }
 
-    pub fn events(mut self, events: Vec<Attribute<Event, MSG>>) -> Self {
+    pub fn events(mut self, events: Vec<Attribute<&'static str, Event, MSG>>) -> Self {
         self.events = events;
         self
     }

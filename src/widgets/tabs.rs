@@ -45,7 +45,7 @@ where
     /// area occupied by this tabs
     area: Rect,
     /// events attached to this block
-    events: Vec<Attribute<Event, MSG>>,
+    events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'a, T, MSG> Default for Tabs<'a, T, MSG>

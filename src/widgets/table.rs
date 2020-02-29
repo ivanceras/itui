@@ -68,7 +68,7 @@ where
     /// area occupied by this table
     area: Rect,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'a, T, H, I, D, R, MSG> Default for Table<'a, T, H, I, D, R, MSG>

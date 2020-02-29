@@ -23,7 +23,7 @@ where
     start_corner: Corner,
     area: Rect,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'b, L, MSG> Default for List<'b, L, MSG>
@@ -164,7 +164,7 @@ pub struct SelectableList<'b, MSG> {
     highlight_symbol: Option<&'b str>,
     area: Rect,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'b, MSG> Default for SelectableList<'b, MSG> {

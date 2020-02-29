@@ -62,7 +62,7 @@ where
     /// Aligenment of the text
     alignment: Alignment,
     /// events attached to this block
-    pub events: Vec<Attribute<Event, MSG>>,
+    pub events: Vec<Attribute<&'static str, Event, MSG>>,
 }
 
 impl<'a, 't, T, MSG> Paragraph<'a, 't, T, MSG>
