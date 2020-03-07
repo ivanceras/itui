@@ -126,7 +126,9 @@ where
     B: Backend,
 {
     let text = [
-        Text::raw("This is a paragraph with several lines. You can change style your text the way you want.\n\nFox example: "),
+        Text::raw(
+            "This is a paragraph with several lines. You can change style your text the way you want.\n\nFox example: ",
+        ),
         Text::styled("under", Style::default().fg(Color::Red)),
         Text::raw(" "),
         Text::styled("the", Style::default().fg(Color::Green)),
@@ -140,7 +142,7 @@ where
         Text::styled("wrap", Style::default().modifier(Modifier::REVERSED)),
         Text::raw(" your "),
         Text::styled("text", Style::default().modifier(Modifier::UNDERLINED)),
-        Text::raw(".\nOne more thing is that it should display unicode characters: 10€")
+        Text::raw(".\nOne more thing is that it should display unicode characters: 10€"),
     ];
     Paragraph::new(text.iter())
         .block(

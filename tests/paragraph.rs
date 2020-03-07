@@ -6,8 +6,7 @@ use itui::{
     Terminal,
 };
 
-const SAMPLE_STRING: &str =
-    "The library is based on the principle of immediate rendering with \
+const SAMPLE_STRING: &str = "The library is based on the principle of immediate rendering with \
      intermediate buffers. This means that at each new frame you should build all widgets that are \
      supposed to be part of the UI. While providing a great flexibility for rich and \
      interactive UI, this may introduce overhead for highly dynamic content.";
@@ -85,8 +84,7 @@ fn paragraph_render_double_width() {
     let backend = TestBackend::new(10, 10);
     let mut terminal = Terminal::new(backend).unwrap();
 
-    let s =
-        "コンピュータ上で文字を扱う場合、典型的には文字による通信を行う場合にその両端点では、";
+    let s = "コンピュータ上で文字を扱う場合、典型的には文字による通信を行う場合にその両端点では、";
     terminal
         .draw(|mut f| {
             let size = f.size();
