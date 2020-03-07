@@ -71,7 +71,22 @@ where
         self
     }
 
-    pub fn area(mut self, area: Rect) -> Self {
+    /// 1 line only
+    pub fn height(&self) -> u16 {
+        3
+    }
+    pub fn width(&self) -> u16 {
+        let text_len = self.text.len();
+        if text_len > 0 {
+            text_len as u16 + 4
+        } else {
+            10
+        }
+    }
+
+    pub fn area(mut self, mut area: Rect) -> Self {
+        area.width = self.width();
+        area.height = self.height();
         self.area = area;
         self
     }
